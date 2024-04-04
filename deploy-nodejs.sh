@@ -8,6 +8,10 @@ DEPLOYER_DIR=$(dirname "${DEPLOYER_FILE_PATH}")
 
 source ${DEPLOYER_DIR}/deploy-common.sh
 
+if [ "$WITH_BUILD" = true ]; then
+  ${DEPLOYER_DIR}/build-nodejs.sh
+fi
+
 # create release directory
 echo "Deploying release ${RELEASE}"
 ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/bash << EOT

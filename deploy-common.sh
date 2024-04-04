@@ -5,6 +5,14 @@ if [ "$#" -lt 1 ]; then
   exit 1
 fi
 
+# The last argument is expected to be the option --with-build
+WITH_BUILD=false
+if [[ " ${@: -1} " == *" --with-build "* ]]; then
+  WITH_BUILD=true
+  # Remove the last argument which is --with-build
+  set -- "${@:1:$(($#-1))}"
+fi
+
 REQUIRED_VARS=("DEPLOY_HOST DEPLOY_USER DEPLOY_PATH")
 
 for variableName in $REQUIRED_VARS; do

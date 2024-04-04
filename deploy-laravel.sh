@@ -8,6 +8,10 @@ DEPLOYER_DIR=$(dirname "${DEPLOYER_FILE_PATH}")
 
 source ${DEPLOYER_DIR}/deploy-common.sh
 
+if [ "$WITH_BUILD" = true ]; then
+  ${DEPLOYER_DIR}/build-laravel.sh
+fi
+
 DEPLOY_PHP_COMMAND="${DEPLOY_PHP_COMMAND:-php}"
 DEPLOY_ARTISAN_COMMANDS="${DEPLOY_ARTISAN_COMMANDS:-storage:link;config:cache;migrate --force;translator:flush;translator:load;view:cache;arbory:route-cache;queue:restart}"
 DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES:-app/public;framework/cache/data;framework/views;framework/sessions;logs}"
