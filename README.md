@@ -20,13 +20,13 @@ stages:
   tags:
     - deploy
   script:
-    - npx -y -p shell-deployer@1.1.0 deploy-nodejs dist/spa/ --with-build
+    - npx -y -p shell-deployer@1.2.0 deploy-nodejs dist/spa/ --with-build
 
 deploy to staging:
   <<: *deploy
   environment:
     name: staging
-    url: https://example-nodejs-project.com
+    url: https://nodejs-project.example.com
   variables:
     DEPLOY_HOST: staging.example.com
     DEPLOY_USER: example_user
@@ -44,13 +44,13 @@ deploy to staging:
   tags:
     - deploy
   script:
-    - npx --yes -p shell-deployer@1.1.0 deploy-laravel app.tgz --with-build
+    - npx --yes -p shell-deployer@1.2.0 deploy-laravel app.tgz --with-build
 
 deploy to staging:
   <<: *deploy
   environment:
     name: staging
-    url: https://example-laravel-project.com
+    url: https://laravel-project.example.com
   variables:
     DEPLOY_HOST: staging.example.com
     DEPLOY_USER: example_user
@@ -84,16 +84,38 @@ deploy to staging:
 - **DEPLOY_SHARED_STORAGE_DIRECTORIES**: List of `;` separated directories in `DEPLOY_PATH/shared/storage` directory to be created. If not set, the default value of `app/public;framework/cache/data;framework/views;framework/sessions;logs` is used.
 - **DEPLOY_ARTISAN_COMMANDS**: List of `;` separated artisan commands to be called to complete deployment process. If not set, the default value of `storage:link;config:cache;migrate --force;translator:flush;translator:load;view:cache;arbory:route-cache;queue:restart` is used.
 
-#### Other Laravel configuration
-When building Laravel deployment archive https://github.com/cube-agency/shell-deployer/blob/master/.buildignore is used.  
-If there are need for customized list of ignorable files and directories, create `.buildignore` named file at the root of your project.
+### Laravel configuration
+
+#### Deployment archive building
+
+When building a Laravel deployment archive, the list of files and directories to exclude from the build package is specified in .buildignore, which can be found here: https://github.com/cube-agency/shell-deployer/blob/master/.buildignore.    
+If you need a customized list of files and directories to ignore, create a file named .buildignore at the root of your project.
+
+#### .env configuration
+
+The deployment process assumes that `DEPLOY_PATH/shared/.env` exists. If it does not, an error will be thrown.
 
 ### Script Parameters
 
 - **DEPLOYMENT_SOURCE_PATH**: This is a required positional argument that specifies the source directory or file of the deployment. It must be passed when invoking the script.
-- **--with-build**: This optional flag can be added as the last argument to the script to indicate that a build process should occur as part of the deployment.
+- **--with-build**: This optional flag can be added as the last argument to the script to indicate that a build process should occur as part of the deployment. If not passed, see [build process](#build-process) for manual build process.
 
 ## Build process
+The build process can also be executed by the deployer script.
 
-Make sure that `npm run build` creates production build.   
-It's same for both Node.js and Laravel deployments.
+Before initiating the deploy process, you can invoke a dedicated build script.
+
+The build process will execute `npm i && npm run build` to construct the project as specified in package.json for both Node.js and Laravel builds.
+
+
+#### Node.js
+Use the command `npx -y -p shell-deployer@1.2.0 build-nodejs` to build.
+
+The build result is the directory specified by `npm run build`.
+
+#### Laravel
+Use the command `npx -y -p shell-deployer@1.2.0 build-laravel` to build.
+
+In addition to the Node.js `npm run build`, `composer install` will be executed to install all required dependencies, excluding dev packages.
+
+The build result is an `app.tgz` file in the local directory, containing all files and directories from the current directory, except those specified in `.buildignore`.
