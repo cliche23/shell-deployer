@@ -14,7 +14,7 @@ DEPLOY_PHP_COMMAND="${DEPLOY_PHP_COMMAND:-php}"
 DEPLOY_SHARED_FILES="${DEPLOY_SHARED_FILES:-.env}"
 DEPLOY_SHARED_DIRECTORIES="${DEPLOY_SHARED_DIRECTORIES:-storage}"
 DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES:-app/public;framework/cache/data;framework/views;framework/sessions;logs}"
-DEPLOY_ARTISAN_COMMANDS="${DEPLOY_ARTISAN_COMMANDS:-storage:link;config:cache;migrate --force;translator:flush;translator:load;view:cache;arbory:route-cache;queue:restart}"
+DEPLOY_ARTISAN_COMMANDS="${DEPLOY_ARTISAN_COMMANDS:-storage:link;config:cache;migrate --force;view:cache;queue:restart}"
 DEPLOY_SOURCE_NAME=`basename ${DEPLOY_SOURCE_PATH}`
 
 echo "Deploying release ${RELEASE}"
