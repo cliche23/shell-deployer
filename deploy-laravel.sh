@@ -5,29 +5,28 @@ set -e
 
 DEPLOYER_FILE_PATH=$(realpath "${BASH_SOURCE[0]}")
 DEPLOYER_DIR=$(dirname "${DEPLOYER_FILE_PATH}")
+DEPLOY_TYPE=laravel
 
 source ${DEPLOYER_DIR}/deploy-common.sh
 
-if [ "$WITH_BUILD" = true ]; then
-  ${DEPLOYER_DIR}/build-laravel.sh
-fi
-
+# laravel specifics vars
 DEPLOY_PHP_COMMAND="${DEPLOY_PHP_COMMAND:-php}"
-DEPLOY_ARTISAN_COMMANDS="${DEPLOY_ARTISAN_COMMANDS:-storage:link;config:cache;migrate --force;translator:flush;translator:load;view:cache;arbory:route-cache;queue:restart}"
-DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES:-app/public;framework/cache/data;framework/views;framework/sessions;logs}"
 DEPLOY_SHARED_FILES="${DEPLOY_SHARED_FILES:-.env}"
 DEPLOY_SHARED_DIRECTORIES="${DEPLOY_SHARED_DIRECTORIES:-storage}"
+DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES:-app/public;framework/cache/data;framework/views;framework/sessions;logs}"
+DEPLOY_ARTISAN_COMMANDS="${DEPLOY_ARTISAN_COMMANDS:-storage:link;config:cache;migrate --force;translator:flush;translator:load;view:cache;arbory:route-cache;queue:restart}"
+DEPLOY_SOURCE_NAME=`basename ${DEPLOY_SOURCE_PATH}`
 
 echo "Deploying release ${RELEASE}"
 # create release directory
-ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/bash << EOT
+ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   # exit script on any failing command
   set -e
 
   # use ; as delimiter for list params
   export IFS=";"
 
-  mkdir -p ${RELEASE_DIRECTORY}
+  mkdir -p ${RELEASE_DIR}
 
   # create shared storage directories
   export LOCAL_DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES}"
@@ -35,7 +34,7 @@ ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/b
     mkdir -p ${DEPLOY_PATH}/shared/storage/\${shared_storage_directory}
   done
 
-  # do not go futher as .env is not created yet
+  # do not go further as .env is not created yet
   export LOCAL_ENV_PATH="${DEPLOY_PATH}/shared/.env"
   if [ ! -f "\${LOCAL_ENV_PATH}" ]; then
     echo "${DEPLOY_PATH}/shared/.env does not exists"
@@ -43,24 +42,23 @@ ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/b
   fi
 EOT
 
-# upload archive to actual server
-echo "Uploading deploy archive"
-scp -i ${DEPLOY_KEY_PATH} -P ${DEPLOY_PORT} ${DEPLOY_SOURCE_PATH} ${DEPLOY_USER}@${DEPLOY_HOST}:${RELEASE_DIRECTORY}/app.tgz
+# call upload method by specifying upload target
+upload ${RELEASE_DIR}/${DEPLOY_SOURCE_NAME}
 
 # extract archive to release directory and run all artisan commands
-ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/bash << EOT
+ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   # exit script on any failing command
   set -e
 
-  # use ; as delimeter for list params
+  # use ; as delimiter for list params
   export IFS=";"
 
   # change working directory
-  cd ${RELEASE_DIRECTORY}
+  cd ${RELEASE_DIR}
 
   # extract and remove archive
-  tar xzf app.tgz
-  rm app.tgz
+  tar xzf ${DEPLOY_SOURCE_NAME}
+  rm ${DEPLOY_SOURCE_NAME}
 
   # symlink shared files
   export LOCAL_DEPLOY_SHARED_FILES="${DEPLOY_SHARED_FILES}"
@@ -81,8 +79,10 @@ ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/b
   done
 
   # switch working directory
-  ln -sTf ${RELEASE_DIRECTORY} ${DEPLOY_PATH}/current
+  echo "Switching to release ${RELEASE}"
+  ln -sTf ${RELEASE_DIR} ${DEPLOY_PATH}/current
 
   # delete all release directories except 2 latest
+  echo "Cleaning up old releases"
   ls -dr ${DEPLOY_PATH}/releases/* | tail -n +3 | xargs rm -fr
 EOT

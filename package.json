@@ -8,6 +8,10 @@
     "build-nodejs": "./build-nodejs.sh",
     "build-laravel": "./build-laravel.sh"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cube-agency/shell-deployer.git"
+  },
   "scripts": {},
   "author": "",
   "license": "ISC"

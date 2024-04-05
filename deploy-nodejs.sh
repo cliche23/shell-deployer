@@ -5,34 +5,33 @@ set -e
 
 DEPLOYER_FILE_PATH=$(realpath "${BASH_SOURCE[0]}")
 DEPLOYER_DIR=$(dirname "${DEPLOYER_FILE_PATH}")
+DEPLOY_TYPE=nodejs
 
 source ${DEPLOYER_DIR}/deploy-common.sh
 
-if [ "$WITH_BUILD" = true ]; then
-  ${DEPLOYER_DIR}/build-nodejs.sh
-fi
+# silence file upload
+SCP_ARGS="${SCP_ARGS} -q"
 
 # create release directory
 echo "Deploying release ${RELEASE}"
-ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/bash << EOT
+ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   mkdir -p ${DEPLOY_PATH}/releases
 EOT
 
-# upload deployment to actual server
-echo "Uploading deploy source"
-scp -q -i ${DEPLOY_KEY_PATH} -P ${DEPLOY_PORT} -r ${DEPLOY_SOURCE_PATH} ${DEPLOY_USER}@${DEPLOY_HOST}:${RELEASE_DIRECTORY}
+# call upload method by specifying upload target
+upload ${RELEASE_DIR}
 
 # extract archive to release directory and run all artisan commands
-ssh -i ${DEPLOY_KEY_PATH} ${DEPLOY_USER}@${DEPLOY_HOST} -p ${DEPLOY_PORT} /bin/bash << EOT
+ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   # exit script on any failing command
   set -e
 
   # change working directory
-  cd ${RELEASE_DIRECTORY}
+  cd ${RELEASE_DIR}
 
   # switch working directory
-  echo "Switch to release ${RELEASE}"
-  ln -sTf ${RELEASE_DIRECTORY} ${DEPLOY_PATH}/current
+  echo "Switching to release ${RELEASE}"
+  ln -sTf ${RELEASE_DIR} ${DEPLOY_PATH}/current
 
   # delete all release directories except 2 latest
   echo "Cleaning up old releases"
