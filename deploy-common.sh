@@ -23,9 +23,6 @@ for variableName in $REQUIRED_VARS; do
   fi
 done
 
-RELEASE=`date -u +%Y%m%d%H%M%S`
-RELEASE_DIR=${DEPLOY_PATH}/releases/${RELEASE}
-
 DEPLOY_SSH_DIR=${HOME}/.ssh
 DEPLOY_SSH_KNOWN_HOSTS_PATH=${DEPLOY_SSH_DIR}/known_hosts
 
@@ -86,3 +83,7 @@ fi
 if [ "${WITH_BUILD}" = true ]; then
   ${DEPLOYER_DIR}/build-${DEPLOY_TYPE}.sh
 fi
+
+
+RELEASE=`date -u +%Y%m%d%H%M%S`
+RELEASE_DIR=${DEPLOY_PATH}/releases/${RELEASE}
