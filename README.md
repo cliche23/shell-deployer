@@ -72,7 +72,7 @@ deploy to staging:
 
 #### Optional Environment Variables
 
-- **DEPLOY_SSH_KNOWN_HOSTS**: If you need to bypass the SSH known hosts check or if you're deploying to a new server that isn't in your `known_hosts` file yet, you can specify the SSH known hosts directly with this variable. The script will append this information to the `known_hosts` file located at `$DEPLOY_SSH_PATH/known_hosts`.
+- **DEPLOY_SSH_KNOWN_HOSTS**: Use this variable to specify custom SSH known hosts when deploying to servers that are not already in your `known_hosts` file, or when there is no existing and/or persistent `known_hosts` file, such as when deploying from a continuous integration (CI) environment. When defined, the script will append the specified known hosts information to the `known_hosts` file located at `$DEPLOY_SSH_PATH/known_hosts`. This ensures secure SSH connections to new servers or under customized deployment conditions.
 - **DEPLOY_SSH_PRIVATE_KEY**: The actual SSH key as a string. This script dynamically creates an SSH key file at `DEPLOY_SSH_PRIVATE_KEY_PATH` and sets the correct permissions (`chmod 600`). This is useful for CI/CD environments where you might not want to store the private key on the filesystem or in the image.
 - **DEPLOY_SSH_PORT**: The port to use for SSH connections. If not set, the default SSH port `22` is used. This allows flexibility for deployments to servers configured to use non-standard SSH ports.
 - **DEPLOY_SSH_PRIVATE_KEY_PATH**: The path where the deployment script should store the SSH key used for the deployment. If not set, the script defaults to using `$HOME/.ssh/id_rsa`. This is critical if you're using a specific SSH key for deployment that isn't the default key.
@@ -119,3 +119,9 @@ Use the command `npx -y -p shell-deployer@1.4.0 build-laravel` to build.
 In addition to the Node.js `npm run build`, `composer install` will be executed to install all required dependencies, excluding dev packages.
 
 The build result is an `app.tgz` file in the local directory, containing all files and directories from the current directory, except those specified in `.buildignore`.
+
+## Miscellaneous
+
+### Retrieving DEPLOY_SSH_KNOWN_HOSTS
+Run the following command with the actual host or IP to output the content of known hosts to the console:   
+`ssh-keyscan -H HOST_OR_IP 2>/dev/null`
