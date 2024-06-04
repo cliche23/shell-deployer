@@ -124,4 +124,4 @@ The build result is an `app.tgz` file in the local directory, containing all fil
 
 ### Retrieving DEPLOY_SSH_KNOWN_HOSTS
 Run the following command with the actual host or IP to output the content of known hosts to the console:   
-`ssh-keyscan -H HOST_OR_IP 2>/dev/null`
+`ssh-keyscan -p 22 HOST_OR_IP 2>/dev/null`
