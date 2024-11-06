@@ -82,7 +82,8 @@ deploy to staging:
 - **DEPLOY_SHARED_FILES**: List of `;` separated files in `DEPLOY_PATH/shared` directory to be symlinked against deployed release. If not set, the default value of `.env` is used.
 - **DEPLOY_SHARED_DIRECTORIES**: List of `;` separated directories in `DEPLOY_PATH/shared` directory to be symlinked against deployed release. If not set, the default value of `storage` is used.
 - **DEPLOY_SHARED_STORAGE_DIRECTORIES**: List of `;` separated directories in `DEPLOY_PATH/shared/storage` directory to be created. If not set, the default value of `app/public;framework/cache/data;framework/views;framework/sessions;logs` is used.
-- **DEPLOY_ARTISAN_COMMANDS**: List of `;` separated artisan commands to be called to complete deployment process. If not set, the default value of `storage:link;config:cache;migrate --force;view:cache;queue:restart` is used.
+- **DEPLOY_ARTISAN_COMMANDS**: List of `;` separated artisan commands to be called to complete deployment process. If not set, the default value of `storage:link;config:cache;migrate --force;view:cache;queue:restart` is used. If `DEPLOY_CUSTOM_COMMANDS` is set, no `DEPLOY_ARTISAN_COMMANDS` are executed.
+- **DEPLOY_CUSTOM_COMMANDS**: List of `;` separated commands to be called to complete deployment process. If not set, no commands are executed.
 
 ### Laravel configuration
 

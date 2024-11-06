@@ -17,6 +17,11 @@ DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES:-app/publ
 DEPLOY_ARTISAN_COMMANDS="${DEPLOY_ARTISAN_COMMANDS:-storage:link;config:cache;migrate --force;view:cache;queue:restart}"
 DEPLOY_SOURCE_NAME=`basename ${DEPLOY_SOURCE_PATH}`
 
+# disable DEPLOY_ARTISAN_COMMANDS if DEPLOY_CUSTOM_COMMANDS have value
+if [ -n "$DEPLOY_CUSTOM_COMMANDS" ]; then
+    DEPLOY_ARTISAN_COMMANDS=""
+fi
+
 echo "Deploying release ${RELEASE}"
 # create release directory
 ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
@@ -76,6 +81,13 @@ ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   export LOCAL_DEPLOY_ARTISAN_COMMANDS="${DEPLOY_ARTISAN_COMMANDS}"
   for artisan_command in \${LOCAL_DEPLOY_ARTISAN_COMMANDS}; do
     bash -c "${DEPLOY_PHP_COMMAND} artisan \${artisan_command}"
+  done
+
+  # custom post-deployment commands
+  export LOCAL_DEPLOY_CUSTOM_COMMANDS="${DEPLOY_CUSTOM_COMMANDS}"
+  for custom_command in \${LOCAL_DEPLOY_CUSTOM_COMMANDS}; do
+    echo "\${custom_command}"
+    bash -c "\${custom_command}"
   done
 
   # switch working directory
