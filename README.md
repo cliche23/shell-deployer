@@ -1,10 +1,10 @@
 # Shell Deployer
 
-Shell Deployer is a simple bash shell based deployment tool designed to streamline the deployment process of Laravel and Node.js projects via GitLab CI/CD pipelines. It simplifies the deployment steps, making it easy to deploy projects to various environments with minimal configuration.
+Shell Deployer is a simple bash shell based deployment tool designed to streamline the deployment process of Laravel, Wordpress and Node.js projects via GitLab CI/CD pipelines. It simplifies the deployment steps, making it easy to deploy projects to various environments with minimal configuration.
 
 ## Getting Started
 
-To use deployer in your project, add npx deployment script call in your `.gitlab-ci.yml` file with the necessary configurations. Below are examples for both Laravel and Node.js projects.
+To use deployer in your project, add npx deployment script call in your `.gitlab-ci.yml` file with the necessary configurations. Below are examples for both Laravel, Wordpress and Node.js projects.
 
 ### Node.js GitLab CI Example
 
@@ -55,6 +55,30 @@ deploy to staging:
     DEPLOY_HOST: staging.example.com
     DEPLOY_USER: example_user
     DEPLOY_PHP_COMMAND: php8.3
+    DEPLOY_PATH: /home/example_user/app
+    DEPLOY_SSH_KNOWN_HOSTS: $STAGING_DEPLOY_KNOWN_HOSTS
+    DEPLOY_SSH_PRIVATE_KEY: $STAGING_DEPLOY_PRIVATE_KEY
+```
+
+### Wordpress GitLab CI Example
+```yaml
+.deploy: &deploy
+  stage: deploy
+  allow_failure: false
+  when: manual
+  tags:
+    - deploy
+  script:
+    - npx --yes -p shell-deployer@1.5.0 deploy-wordpress app.tgz --with-build
+
+deploy to staging:
+  <<: *deploy
+  environment:
+    name: staging
+    url: https://wordpress-project.example.com
+  variables:
+    DEPLOY_HOST: staging.example.com
+    DEPLOY_USER: example_user
     DEPLOY_PATH: /home/example_user/app
     DEPLOY_SSH_KNOWN_HOSTS: $STAGING_DEPLOY_KNOWN_HOSTS
     DEPLOY_SSH_PRIVATE_KEY: $STAGING_DEPLOY_PRIVATE_KEY
@@ -113,6 +137,13 @@ The build process will execute `npm i && npm run build` to construct the project
 Use the command `npx -y -p shell-deployer@1.5.0 build-nodejs` to build.
 
 The build result is the directory specified by `npm run build`.
+
+#### Wordpress
+Use the command `npx -y -p shell-deployer@1.5.0 build-wordpress` to build.
+
+In addition to the Node.js `npm run build`, `composer install` will be executed to install all required dependencies, excluding dev packages.
+
+The build result is an `app.tgz` file in the local directory, containing all files and directories from the current directory, except those specified in `.buildignore`.
 
 #### Laravel
 Use the command `npx -y -p shell-deployer@1.5.0 build-laravel` to build.
