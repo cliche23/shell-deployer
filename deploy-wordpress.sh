@@ -11,7 +11,7 @@ source ${DEPLOYER_DIR}/deploy-common.sh
 
 # wordpress specifics vars
 DEPLOY_SHARED_FILES="${DEPLOY_SHARED_FILES:-.env}"
-DEPLOY_SHARED_DIRECTORIES="${DEPLOY_SHARED_DIRECTORIES:-wp-content/uploads}"
+DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES:-uploads;languages}"
 DEPLOY_SOURCE_NAME=`basename ${DEPLOY_SOURCE_PATH}`
 
 echo "Deploying release ${RELEASE}"
@@ -28,7 +28,7 @@ ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   # create shared storage directories
   export LOCAL_DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES}"
   for shared_storage_directory in \${LOCAL_DEPLOY_SHARED_STORAGE_DIRECTORIES}; do
-    mkdir -p ${DEPLOY_PATH}/shared/storage/\${shared_storage_directory}
+    mkdir -p ${DEPLOY_PATH}/shared/wp-content/\${shared_storage_directory}
   done
 
   # do not go further as .env is not created yet
