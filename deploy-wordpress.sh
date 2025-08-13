@@ -25,6 +25,12 @@ ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
 
   mkdir -p ${RELEASE_DIR}
 
+  # create shared storage directories
+  export LOCAL_DEPLOY_SHARED_STORAGE_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES}"
+  for shared_storage_directory in \${LOCAL_DEPLOY_SHARED_STORAGE_DIRECTORIES}; do
+    mkdir -p ${DEPLOY_PATH}/shared/storage/\${shared_storage_directory}
+  done
+
   # do not go further as .env is not created yet
   export LOCAL_ENV_PATH="${DEPLOY_PATH}/shared/.env"
   if [ ! -f "\${LOCAL_ENV_PATH}" ]; then
