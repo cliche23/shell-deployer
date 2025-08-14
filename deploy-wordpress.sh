@@ -64,9 +64,9 @@ ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   done
 
   # symlink shared directories
-  export LOCAL_DEPLOY_SHARED_DIRECTORIES="${DEPLOY_SHARED_DIRECTORIES}"
+  export LOCAL_DEPLOY_SHARED_DIRECTORIES="${DEPLOY_SHARED_STORAGE_DIRECTORIES}"
   for shared_directory in \${LOCAL_DEPLOY_SHARED_DIRECTORIES}; do
-    ln -sf ${DEPLOY_PATH}/shared/\${shared_directory} \${shared_directory}
+    ln -sf ${DEPLOY_PATH}/shared/wp-content/\${shared_directory} wp-content/\${shared_directory}
   done
 
   # switch working directory
