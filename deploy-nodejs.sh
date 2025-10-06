@@ -33,6 +33,13 @@ ssh ${SSH_ARGS} ${DEPLOY_USER}@${DEPLOY_HOST} /bin/bash << EOT
   echo "Switching to release ${RELEASE}"
   ln -sTf ${RELEASE_DIR} ${DEPLOY_PATH}/current
 
+  # custom post-deployment commands
+  export LOCAL_DEPLOY_CUSTOM_COMMANDS="${DEPLOY_CUSTOM_COMMANDS}"
+  for custom_command in \${LOCAL_DEPLOY_CUSTOM_COMMANDS}; do
+    echo "\${custom_command}"
+    bash -c "\${custom_command}"
+  done
+
   # delete all release directories except 2 latest
   echo "Cleaning up old releases"
   ls -dr ${DEPLOY_PATH}/releases/* | tail -n +3 | xargs rm -fr
